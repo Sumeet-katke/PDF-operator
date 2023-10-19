@@ -8,7 +8,7 @@ class ILovePDFAPI:
     def __init__(self, api_key):
 
         self.api_key = api_key
-        self.api_url = 'https://developer.ilovepdf.com/'
+        self.api_url = r'https://api.ilovepdf.com/v1/start'
         self.tasks = {
             'merge': 'merge',
             'split': 'split',
@@ -19,8 +19,6 @@ class ILovePDFAPI:
     
     #program to vreate the task
     def create_task(self, task_name, file):
-
-        #making the request url
         url = f'{self.api_url}/{self.tasks[task_name]}'
         headers = {
             'Authorization': f'token {self.api_key}'
@@ -30,16 +28,25 @@ class ILovePDFAPI:
             'task': 'create'
         }
 
-        #getting response
-        response = requests.post(url, headers=headers, data=data)
+        try:
+            response = requests.post(url, headers=headers, data=data)
 
-        #If the webpage works it will send code '200'
-        if response.status_code == 200:
-            task_id = response.json()['task']
-            return task_id
-        else:
-            print(f'Error Creating task: {response.status_code}')
-            return None
+            if response is not None:
+                if response.status_code == 200:
+                    task_id = response.json().get('task')
+                    if task_id is not None:
+                        return task_id
+                    else:
+                        print(f'Error: Task ID not found in the response.')
+                else:
+                    print(f'Error Creating task: {response.status_code}')
+                    print(f'Error Details: {response.json()}')  # Display the error response for debugging
+            else:
+                print('Error: No response received from the API.')
+
+        except requests.exceptions.RequestException as e:
+            print(f'Error: Failed to connect to the ILOVEPDF API. {e}')
+
 
     #Function to upload the PDF files:
     def upload_file(self, task_id, file_path):
@@ -98,7 +105,7 @@ class ILovePDFAPI:
 def main():
     #Get a API security key from ILOVEPDF's webpage
     #Given is a free API key which allows only 250 files/month
-    api_key = 'secret_key_c88ba0a99f463c6d5b46c06e2d6b8a25_-jRt6b007724f0a2f969f5c63576d0fc8c1a5'
+    api_key = r'secret_key_d1dd3593e04e27c97d91795b9fe1c823_m_PPI00cd339ac1b92b91b6d417b9a704abe5'
 
 
     #Creating an object of the class while passing API key
